@@ -1,16 +1,7 @@
-const characterCard = ({ name, species, status, image }) => { //destructuring again by naming keys from data
-
-    /* const name = characterData.name
-    const species = characterData.species
-    const status = characterData.status
-    const image = characterData.image */
-
-    // const { name, species, status, image } = characterData // DESTRUCTURING :: MUST BE SAME AS KEY
-
+const characterCard = ({ name, species, status, image }) => {
     return ` <div class="card"> 
     <h2>${name}</h2>
     <h3 class="species">${species}</h3>
-    <h3>"kismakcsa"</h3>
     <h4>${status}</h4>
     <img src=${image} />
     </div> `
@@ -21,8 +12,46 @@ const charactersComponent = (charactersData) => `
         ${charactersData.map(characterData => characterCard(characterData)).join("")}
     </div>
 `
+const buttonComponent = (type) => `
+    <button class=${type}>${type}</button>
+`
 
 const makeDomFromData = (data, rootElement) => {
+    rootElement.innerHTML = ""
+    
+    if (data.info.prev) rootElement.insertAdjacentHTML("beforeend", buttonComponent("prev"))
+    if (data.info.next) rootElement.insertAdjacentHTML("beforeend", buttonComponent("next"))
+
+    const buttons = document.querySelectorAll("button")
+    buttons.forEach((button) => button.addEventListener("click", () => fetch(data.info[button.classList[0]])
+        .then(res => res.json())
+        .then(newData => makeDomFromData(newData, rootElement))
+    ))
+
+    /* if (data.info.prev) {
+        rootElement.insertAdjacentHTML("beforeend", buttonComponent("prev"))
+        const prevButtonElement = document.querySelector("button.prev")
+        prevButtonElement.addEventListener("click", () => {
+            fetch(data.info.prev)
+            .then(res => res.json())
+            .then(newData => {
+                makeDomFromData(newData, rootElement)
+            })
+        })
+    }
+    
+    if (data.info.next) {
+        rootElement.insertAdjacentHTML("beforeend", buttonComponent("next"))
+        const nextButtonElement = document.querySelector("button.next")
+        nextButtonElement.addEventListener("click", () => {
+            fetch(data.info.next)
+            .then(res => res.json())
+            .then(newData => {
+                makeDomFromData(newData, rootElement)
+            })
+        })
+    } */
+
     rootElement.insertAdjacentHTML("beforeend", charactersComponent(data.results))
 }
 
@@ -31,11 +60,6 @@ fetch("https://rickandmortyapi.com/api/character")
     .then((data) => {
         console.log(data)
 
-        /* data.results.forEach((characterData) => {
-            document.querySelector(`#root`).insertAdjacentHTML("beforeend", `
-                <div class="card"> ${characterData.name} </div>
-            `)
-        }); */
-
-        makeDomFromData(data, document.querySelector(`#root`))
+        const rootElement = document.querySelector(`#root`)
+        makeDomFromData(data, rootElement)
     })
